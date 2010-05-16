@@ -1,0 +1,52 @@
+predicates:
+ - clear ?x
+ - on-table ?x
+ - arm-empty
+ - holding ?x
+ - on ?x ?y
+
+actions:
+  pickup:
+    parameters: ?ob
+    precondition:
+      - clear ?ob
+      - on-table ?ob
+      - arm-empty
+    effect:
+      - holding ?ob
+      - not clear ?ob
+      - not on-table ?ob
+      - not arm-empty
+  putdown:
+     parameters: ?ob
+     precondition:
+       - holding ?ob
+     effect:
+       - clear ?ob
+       - arm-empty
+       - on-table ?ob
+       - not holding ?ob
+
+  stack:
+     parameters: ?ob ?underob
+     precondition: 
+       - clear ?underob
+       - holding ?ob
+     effect:
+       - arm-empty
+       - clear ?ob
+       - on ?ob ?underob
+       - not clear ?underob
+       - not holding ?ob
+  unstack:
+     parameters: ?ob ?underob
+     precondition:
+       - on ?ob ?underob
+       - clear ?ob
+       - arm-empty
+     effect:
+       - holding ?ob
+       - clear ?underob
+       - not on ?ob ?underob
+       - not clear ?ob
+       - not arm-empty

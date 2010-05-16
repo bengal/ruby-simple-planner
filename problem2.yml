@@ -1,0 +1,20 @@
+objects:
+  - A
+  - B
+  - C
+  - D
+init:
+  - on-table A
+  - on B A
+  - clear B
+  - on-table C
+  - on D C
+  - clear D
+  - arm-empty
+goal:
+  - on-table B
+  - on A B
+  - on D A
+  - on C D
+  - clear C
+  - arm-empty
