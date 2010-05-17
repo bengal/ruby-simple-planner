@@ -1,0 +1,31 @@
+objects:
+  - H
+  - G 
+  - F 
+  - E 
+  - C 
+  - B 
+  - D 
+  - A
+init:
+  - clear A
+  - clear D
+  - clear B
+  - clear C
+  - on-table E
+  - on-table F
+  - on-table B 
+  - on-table C
+  - on A G
+  - on G E
+  - on D H
+  - on H F
+  - arm-empty
+goal:
+  - on D F
+  - on F E
+  - on E H
+  - on H C
+  - on C A
+  - on A G
+  - on G B

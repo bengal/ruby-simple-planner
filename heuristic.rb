@@ -7,31 +7,11 @@ class Heuristic
   def initialize(problem)
     @problem = problem
   end
-  
-  def choose_best_action(current_state, actions)
-    best_heuristic = INFINITY
-    best_actions = []
-    if rand(100) < 20
-      return actions[rand(actions.size)]
-    end
-    actions.each do |action|
-      new_state = current_state.clone
-      new_state.apply_action(action)
-      h = calculate_heuristic(new_state)
-      debug "  Heuristic for action #{action}: #{h}"
-      if h == best_heuristic
-        best_actions << action
-      elsif h < best_heuristic
-        best_actions = [action]
-        best_heuristic = h
-      end
-    end
-    return best_actions.size == 1 ? 
-    best_actions[0] : best_actions[rand(best_actions.size)]
-  end
-  
+    
   def calculate_heuristic(state)
     
+    state = state.clone
+
     distance = Hash.new(INFINITY)
     state.each_fact{|f| distance[f] = 0}
     i = 0

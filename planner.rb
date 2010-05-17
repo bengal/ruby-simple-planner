@@ -1,10 +1,11 @@
+require 'rubygems'
 require 'yaml'
+require 'algorithms'
+
 require 'heuristic'
 
-module Kernel
-  def debug(str)
+def debug(str)
     #puts str
-  end
 end
 
 class Problem
@@ -70,7 +71,7 @@ class Fact
 end
 
 class State
-  attr_accessor :facts
+  attr_accessor :facts, :heuristic, :previuos, :action
 
   def initialize(value, predicates)
     @facts = {}
@@ -82,6 +83,9 @@ class State
       fact = Fact.get_or_create(predicate, subst)
       @facts[fact.unique_key] = fact 
     end
+    @heuristic = -1
+    @previous = nil
+    @action = nil
   end
   
   def clone
@@ -126,8 +130,6 @@ class State
 
   def find_applicable_actions(ignore_negations = false)
     res = []
-    #puts "find_applicable_actions(#{ignore_negations})"
-    #puts self
     Problem.instance.operators.each do |operator|
       Planner.comb(Problem.instance.objects, operator.parameters.size).each do |objs|
         subst = {}
@@ -150,7 +152,7 @@ class State
       negated = (prec.split[0].casecmp('not') == 0)
       next if negated && ignore_negations
       if (exists == negated)
-        #puts "Action #{action} is not applicable - failed precondition #{prec}"
+        debug "Action #{action} is not applicable - failed precondition #{prec}"
         return false
       end
     end
@@ -171,6 +173,41 @@ class State
     f = Fact.get_or_create(predicate, subst)
   end
 
+  def expand
+    actions = find_applicable_actions
+    states = []
+    actions.each do |action|
+      new_state = self.clone
+      new_state.apply_action(action)
+      new_state.action = action
+      new_state.previuos = self
+      states << new_state
+    end
+    states
+  end
+
+  def solution
+    solution = []
+    current = self
+    while current
+      solution << current.action if current.action
+      current = current.previuos
+    end
+    solution.reverse
+  end
+
+  # TODO write an efficient implementation
+  def ==(object)
+    if object.equal?(self)
+      return true
+    elsif !self.class.equal?(object.class)
+      return false
+    end
+    
+    object.each_fact{|f| return false if !self.include_fact?(f)}
+    self.each_fact{|f| return false if !object.include_fact?(f)}
+    true
+  end
 
 end
 
@@ -233,25 +270,40 @@ class Planner
   def solve
     solution = []
     while !is_goal_satisfied?(@current_state)
-      actions = @current_state.find_applicable_actions
-      if actions.empty?
+      @current_state = next_state(@current_state)
+      puts "  h=#{@current_state.heuristic}"
+      if !@current_state
         puts "DEAD END."
         exit
       end
-      action = choose_best_action(@current_state, actions)
-      puts "Executing action #{action}"
-      solution << action
-      @current_state.apply_action(action)
     end
-    puts "SOLUTION LENGTH: #{solution.size}"
-    puts solution.join(" ")
+    puts "SOLUTION: (#{@current_state.solution.size} actions)"
+    puts @current_state.solution.join("\n")
   end
   
 
   
-  def choose_best_action(state, actions)
-    #actions[rand(actions.size)]
-    @heuristic.choose_best_action(@current_state, actions)
+  def next_state(current_state)
+
+    queue = Containers::PriorityQueue.new{ |x, y| (x <=> y) == -1 }
+    current_state.heuristic = @heuristic.calculate_heuristic(current_state)
+    queue.push(current_state, current_state.heuristic)
+    tabu_states = []
+
+    while !queue.empty?
+      state = queue.pop
+      return state if state.heuristic < current_state.heuristic
+      state.expand.each do |s| 
+        s.heuristic = @heuristic.calculate_heuristic(s)
+        debug "#{s.heuristic} (queue=#{queue.size})"
+        if !tabu_states.include?(s)
+          queue.push(s, s.heuristic)
+          tabu_states << s
+        end
+      end
+    end
+
+    nil
   end
   
   def is_goal_satisfied?(state)
@@ -275,5 +327,12 @@ class Planner
 
 end
 
-planner = Planner.new('domain.yml','problem.yml')
-planner.solve
+if __FILE__ == $0
+  if ARGV.size < 2
+    puts "Usage: #{__FILE__} <domain> <problem_number>"
+    exit
+  end
+
+  planner = Planner.new("domains/#{ARGV[0]}/domain.yml","domains/#{ARGV[0]}/problem#{ARGV[1]}.yml")
+  planner.solve
+end
