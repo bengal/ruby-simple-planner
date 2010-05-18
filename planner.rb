@@ -54,14 +54,11 @@ class Fact
   end
 
   def unique_key
-    Fact.unique_key(@predicate, @substitutions)
+    @unique_key ||= Fact.unique_key(@predicate, @substitutions)
   end
 
   def to_s
-    if !@unique_key
-      @unique_key = unique_key
-    end
-    @unique_key
+    unique_key
   end
   
   def Fact.instances
@@ -71,7 +68,7 @@ class Fact
 end
 
 class State
-  attr_accessor :facts, :heuristic, :previuos, :action
+  attr_accessor :facts, :heuristic, :previous, :action
 
   def initialize(value, predicates)
     @facts = {}
@@ -180,7 +177,7 @@ class State
       new_state = self.clone
       new_state.apply_action(action)
       new_state.action = action
-      new_state.previuos = self
+      new_state.previous = self
       states << new_state
     end
     states
@@ -191,7 +188,7 @@ class State
     current = self
     while current
       solution << current.action if current.action
-      current = current.previuos
+      current = current.previous
     end
     solution.reverse
   end
@@ -269,15 +266,17 @@ class Planner
 
   def solve
     solution = []
+    @current_state.heuristic = @heuristic.calculate_heuristic(@current_state)
+    print "Initial distance = #{@current_state.heuristic} "
     while !is_goal_satisfied?(@current_state)
       @current_state = next_state(@current_state)
-      puts "  h=#{@current_state.heuristic}"
+      printf "\n     h =%3d ", @current_state.heuristic
       if !@current_state
         puts "DEAD END."
         exit
       end
     end
-    puts "SOLUTION: (#{@current_state.solution.size} actions)"
+    puts "\nSOLUTION: (#{@current_state.solution.size} actions)"
     puts @current_state.solution.join("\n")
   end
   
@@ -286,7 +285,6 @@ class Planner
   def next_state(current_state)
 
     queue = Containers::PriorityQueue.new{ |x, y| (x <=> y) == -1 }
-    current_state.heuristic = @heuristic.calculate_heuristic(current_state)
     queue.push(current_state, current_state.heuristic)
     tabu_states = []
 
@@ -294,6 +292,7 @@ class Planner
       state = queue.pop
       return state if state.heuristic < current_state.heuristic
       state.expand.each do |s| 
+        print '.'
         s.heuristic = @heuristic.calculate_heuristic(s)
         debug "#{s.heuristic} (queue=#{queue.size})"
         if !tabu_states.include?(s)
