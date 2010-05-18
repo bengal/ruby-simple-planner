@@ -1,0 +1,50 @@
+predicates:
+  - floor ?floor
+  - passenger ?passenger
+  - origin ?person ?floor
+  - destin ?person ?floor
+  - above ?floor1 ?floor2
+  - boarded ?person
+  - served ?person
+  - lift-at ?floor
+actions:
+  board:
+    parameters: ?f ?p
+    precondition:
+      - floor ?f
+      - passenger ?p
+      - lift-at ?f
+      - origin ?p ?f
+    effect:
+      - boarded ?p
+  depart:
+    parameters: ?f ?p
+    precondition:
+      - floor ?f
+      - passenger ?p
+      - lift-at ?f
+      - destin ?p ?f
+      - boarded ?p
+    effect:
+      - not boarded ?p
+      - served ?p
+  up:
+    parameters: ?f1 ?f2
+    precondition:
+      - floor ?f1
+      - floor ?f2
+      - lift-at ?f1
+      - above ?f1 ?f2
+    effect:
+      - lift-at ?f2 
+      - not lift-at ?f1
+  down:
+    parameters: ?f1 ?f2
+    precondition: 
+      - floor ?f1 
+      - floor ?f2 
+      - lift-at ?f1 
+      - above ?f2 ?f1
+    effect: 
+      - lift-at ?f2 
+      - not lift-at ?f1
