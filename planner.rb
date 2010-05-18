@@ -36,29 +36,29 @@ class Predicate
 end
 
 class Fact
-  attr_reader :predicate, :substitutions
+  attr_reader :predicate, :values
   @@facts = {}
 
-  def initialize(predicate, subst)
+  def initialize(predicate, values)
     @predicate = predicate
-    @substitutions = subst
+    @values = values
   end
 
-  def Fact.get_or_create(predicate, subst)
-    key = Fact.unique_key(predicate, subst)
-    @@facts[key] || @@facts[key] = Fact.new(predicate, subst)
+  def Fact.find(predicate, values)
+    key = Fact.key(predicate, values)
+    @@facts[key] ||= Fact.new(predicate, values)
   end
 
-  def Fact.unique_key(predicate, subst)
-    predicate.name + "(" + predicate.parameters.map{|e| subst[e]}.join(',') + ")"
+  def Fact.key(predicate, values)
+    predicate.name + values.to_s
   end
 
-  def unique_key
-    @unique_key ||= Fact.unique_key(@predicate, @substitutions)
+  def key
+    @key ||= Fact.key(@predicate, @values)
   end
 
   def to_s
-    unique_key
+    key
   end
   
   def Fact.instances
@@ -75,10 +75,8 @@ class State
     value.each do |f|
       tokens = f.split
       predicate = predicates[tokens.shift]
-      subst = {}
-      predicate.parameters.each{|param| subst[param] = tokens.shift}
-      fact = Fact.get_or_create(predicate, subst)
-      @facts[fact.unique_key] = fact 
+      fact = Fact.find(predicate, tokens)
+      @facts[fact.key] = fact 
     end
     @heuristic = -1
     @previous = nil
@@ -92,11 +90,11 @@ class State
   end
 
   def add_fact(fact)
-    @facts[fact.unique_key] = fact
+    @facts[fact.key] = fact
   end
 
   def delete_fact(fact)
-    @facts.delete(fact.unique_key)
+    @facts.delete(fact.key)
   end
 
   def each_fact(&block)
@@ -104,7 +102,7 @@ class State
   end
 
   def include_fact?(fact)
-    return @facts.include?(fact.unique_key)
+    return @facts.include?(fact.key)
   end
 
   def to_s
@@ -162,12 +160,12 @@ class State
       tokens.shift
     end
     predicate = Problem.instance.predicates[tokens[0]]
-    subst = {}
     tokens = tokens[1..-1]
+    values = []
     predicate.parameters.each do |p| 
-      subst[p] = action.substitutions[tokens.shift] 
+      values << action.substitutions[tokens.shift] 
     end
-    f = Fact.get_or_create(predicate, subst)
+    f = Fact.find(predicate, values)
   end
 
   def expand
