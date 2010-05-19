@@ -123,7 +123,7 @@ class State
     debug "NEW STATE:" + self.to_s
   end
 
-  def find_applicable_actions(ignore_negations = false)
+  def find_applicable_actions
     res = []
     Problem.instance.operators.each do |operator|
       Planner.comb(Problem.instance.objects, operator.parameters.size).each do |objs|
@@ -131,7 +131,7 @@ class State
         param = Array.new(operator.parameters)
         objs.each{|o| subst[param.shift] = o}
         action = Action.new(operator, subst)
-        res << action if is_applicable?(action, ignore_negations)
+        res << action if is_applicable?(action)
       end
     end
     
@@ -140,13 +140,11 @@ class State
     res
   end
   
-  def is_applicable?(action, ignore_negations = false)
+  def is_applicable?(action)
     action.operator.precondition.each do |prec|
       f = get_matching_fact(prec, action)
       exists = include_fact?(f)
-      negated = (prec.split[0].casecmp('not') == 0)
-      next if negated && ignore_negations
-      if (exists == negated)
+      if (!exists)
         debug "Action #{action} is not applicable - failed precondition #{prec}"
         return false
       end
