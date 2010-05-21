@@ -1,0 +1,45 @@
+objects:
+  - B1
+  - B2
+  - B3
+  - D1
+  - D2
+  - D3
+init:
+  - surface B1
+  - surface B2
+  - surface B3
+  - disk D1
+  - disk D2
+  - disk D3
+  - surface D1
+  - surface D2
+  - surface D3
+  - larger D2 D1
+  - larger D3 D1
+  - larger D3 D2
+
+  - larger B1 D1
+  - larger B2 D1
+  - larger B3 D1
+
+  - larger B1 D2
+  - larger B2 D2
+  - larger B3 D2
+
+  - larger B1 D3
+  - larger B2 D3
+  - larger B3 D3
+
+  - on D3 B1
+  - on D2 D3
+  - on D1 D2
+  - clear D1
+  - clear B2
+  - clear B3
+goal:
+  - on D3 B3
+  - on D2 D3
+  - on D1 D2
+  - clear D1
+

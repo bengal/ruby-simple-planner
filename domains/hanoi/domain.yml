@@ -1,0 +1,22 @@
+predicates:
+  - disk ?d
+  - surface ?s
+  - larger ?s1 ?s2
+  - on ?s1 ?s2
+  - clear ?s
+actions:
+  move:
+    parameters: ?d ?s1 ?s2
+    precondition:
+      - disk ?d
+      - surface ?s1
+      - surface ?s2
+      - clear ?d
+      - on ?d ?s1
+      - clear ?s2
+      - larger ?s2 ?d
+    effect:
+      - not on ?d ?s1
+      - not clear ?s2
+      - on ?d ?s2
+      - clear ?s1

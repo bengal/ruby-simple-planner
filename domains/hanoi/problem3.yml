@@ -1,0 +1,102 @@
+objects:
+  - B1
+  - B2
+  - B3
+  - B4
+  - B5
+  - D1
+  - D2
+  - D3
+  - D4
+  - D5
+  - D6
+  - D7
+init:
+  - surface B1
+  - surface B2
+  - surface B3
+  - disk D1
+  - disk D2
+  - disk D3
+  - disk D4
+  - disk D5
+  - disk D6
+  - disk D7
+  - surface D1
+  - surface D2
+  - surface D3
+  - surface D4
+  - surface D5
+  - surface D6
+  - surface D7
+  - larger D2 D1
+  - larger D3 D1
+  - larger D4 D1
+  - larger D5 D1
+  - larger D6 D1
+  - larger D7 D1
+  - larger D3 D2
+  - larger D4 D2
+  - larger D5 D2
+  - larger D6 D2
+  - larger D7 D2
+  - larger D4 D3
+  - larger D5 D3
+  - larger D6 D3
+  - larger D7 D3
+  - larger D5 D4
+  - larger D6 D4
+  - larger D7 D4
+  - larger D6 D5
+  - larger D7 D5
+  - larger D7 D6
+
+  - larger B1 D1
+  - larger B2 D1
+  - larger B3 D1
+
+  - larger B1 D2
+  - larger B2 D2
+  - larger B3 D2
+
+  - larger B1 D3
+  - larger B2 D3
+  - larger B3 D3
+
+  - larger B1 D4
+  - larger B2 D4
+  - larger B3 D4
+
+  - larger B1 D5
+  - larger B2 D5
+  - larger B3 D5
+
+  - larger B1 D6
+  - larger B2 D6
+  - larger B3 D6
+
+  - larger B1 D7
+  - larger B2 D7
+  - larger B3 D7
+
+  - on D7 B1
+  - on D4 D7
+  - on D1 D4
+  - clear D1
+  - on D6 B2
+  - on D5 D6
+  - on D3 D5
+  - on D2 D3
+  - clear D2
+  - clear B3
+goal:
+  - on D7 B3
+  - on D6 D7
+  - on D5 D6
+  - on D4 D5
+  - on D3 D4
+  - on D2 D3
+  - on D1 D2
+
+
+
