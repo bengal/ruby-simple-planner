@@ -4,15 +4,24 @@ Ruby Simple Planner
 DESCRIPTION
 -----------
 
-A simple planner written in Ruby
+A simple planner for [STRIPS](http://en.wikipedia.org/wiki/STRIPS) domains written in Ruby
 
 REQUIREMENTS
 ------------
 
- * sudo gem install algorithms
+        $ sudo gem install algorithms
 
 USAGE
 -----
+
+The planner accepts STRIPS domains and problems specified with a YAML syntax. 
+In the `domains` directory you find the representations of these problems:
+
+* **blocks** is the [classical problem](http://en.wikipedia.org/wiki/Blocks_world) of stacking blocks on a table surface using a robotic arm
+* **hanoi** is the well-known game of the Tower of Hanoi
+* **elevator** represents the problem of transporting people between floors of a building.
+
+You can launch the planner specifying a domain and a problem number (currently 1 to 3):
 
         planner.rb <domain> <problem_number>
 
