@@ -55,7 +55,7 @@ class Fact
   def to_s
     key
   end
-  
+
   def Fact.instances
     @@facts.values
   end
@@ -71,14 +71,14 @@ class State
       tokens = f.split
       predicate = predicates[tokens.shift]
       fact = Fact.find(predicate, tokens)
-      @facts[fact.key] = fact 
+      @facts[fact.key] = fact
     end
     @heuristic = -1
     @previous = nil
     @action = nil
     @problem = problem
   end
-  
+
   def clone
     s = State.new(@problem, [], nil)
     s.facts = @facts.dup
@@ -131,12 +131,12 @@ class State
         res << action if is_applicable?(action)
       end
     end
-    
+
     debug "Applicable actions in state #{self}: "
     debug res
     res
   end
-  
+
   def is_applicable?(action)
     action.operator.precondition.each do |prec|
       f = get_matching_fact(prec, action)
@@ -157,8 +157,8 @@ class State
     predicate = @problem.predicates[tokens[0]]
     tokens = tokens[1..-1]
     values = []
-    predicate.parameters.each do |p| 
-      values << action.substitutions[tokens.shift] 
+    predicate.parameters.each do |p|
+      values << action.substitutions[tokens.shift]
     end
     f = Fact.find(predicate, values)
   end
@@ -193,7 +193,7 @@ class State
     elsif !self.class.equal?(object.class)
       return false
     end
-    
+
     object.each_fact{|f| return false if !self.include_fact?(f)}
     self.each_fact{|f| return false if !object.include_fact?(f)}
     true
@@ -227,7 +227,7 @@ class Action
 end
 
 class Planner
-  
+
   def initialize(domain_file, problem_file)
 
     domain = YAML.load(File.new(domain_file,'r').read)
@@ -274,9 +274,7 @@ class Planner
     puts "\nSOLUTION: (#{@current_state.solution.size} actions)"
     puts @current_state.solution.join("\n")
   end
-  
 
-  
   def next_state(current_state)
 
     queue = Containers::PriorityQueue.new{ |x, y| (x <=> y) == -1 }
@@ -286,7 +284,7 @@ class Planner
     while !queue.empty?
       state = queue.pop
       return state if state.heuristic < current_state.heuristic
-      state.expand.each do |s| 
+      state.expand.each do |s|
         print '.'
         s.heuristic = @heuristic.calculate_heuristic(s)
         debug "#{s.heuristic} (queue=#{queue.size})"
@@ -299,14 +297,14 @@ class Planner
 
     nil
   end
-  
+
   def is_goal_satisfied?(state)
     @problem.goal.each_fact do |goal|
       return false if !state.include_fact?(goal)
     end
     true
   end
-  
+
   def Planner.comb(array, n)
     return array.map{|e| [e]} if n == 1
     res = []
@@ -318,7 +316,6 @@ class Planner
    res
   end
 
-
 end
 
 if __FILE__ == $0
@@ -327,6 +324,7 @@ if __FILE__ == $0
     exit
   end
 
-  planner = Planner.new("domains/#{ARGV[0]}/domain.yml","domains/#{ARGV[0]}/problem#{ARGV[1]}.yml")
+  planner = Planner.new("domains/#{ARGV[0]}/domain.yml",
+                        "domains/#{ARGV[0]}/problem#{ARGV[1]}.yml")
   planner.solve
 end
