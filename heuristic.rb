@@ -1,8 +1,5 @@
 
-
 class Heuristic
-
-  INFINITY = 99999999
 
   def initialize(problem)
     @problem = problem
@@ -12,7 +9,7 @@ class Heuristic
     
     state = state.clone
 
-    distance = Hash.new(INFINITY)
+    distance = Hash.new(nil)
     state.each_fact{|f| distance[f] = 0}
     i = 0
     loop do 
@@ -22,14 +19,15 @@ class Heuristic
         prec_distance = 0
         action.operator.precondition.each do |prec|
           fact = state.get_matching_fact(prec, action)
-          if distance[fact] == INFINITY
-            puts "ERROR: fact #{fact} has distance #{distance[fact]}"
+          if !distance[fact]
+            puts "ERROR: distance to fact #{fact} can not be computed"
+            exit 1
           end
           prec_distance += distance[fact]
         end
         new_facts = apply_action_relaxed(state, action)
         new_facts.each do |f| 
-          if prec_distance + 1 < distance[f]
+          if !distance[f] || prec_distance + 1 < distance[f]
             distance[f] = prec_distance + 1 
           end
         end
