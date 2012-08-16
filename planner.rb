@@ -9,14 +9,21 @@ def debug(str)
 end
 
 class Problem
-  attr_accessor :predicates, :objects, :operators, :initial_state, :goal
+  attr_accessor :predicates, :objects, :operators, :initial_state, :goal, :facts
   def initialize(values)
     @predicates = values[:predicates]
     @objects = values[:objects]
     @operators = values[:operators]
     @initial_state = values[:initial_state]
     @goal = values[:goal]
+    @facts = {}
   end
+
+  def get_fact(predicate, values)
+    key = Fact.key(predicate, values)
+    @facts[key] ||= Fact.new(predicate, values)
+  end
+
 end
 
 class Predicate
@@ -32,16 +39,10 @@ end
 
 class Fact
   attr_reader :predicate, :values
-  @@facts = {}
 
   def initialize(predicate, values)
     @predicate = predicate
     @values = values
-  end
-
-  def Fact.find(predicate, values)
-    key = Fact.key(predicate, values)
-    @@facts[key] ||= Fact.new(predicate, values)
   end
 
   def Fact.key(predicate, values)
@@ -56,27 +57,23 @@ class Fact
     key
   end
 
-  def Fact.instances
-    @@facts.values
-  end
-
 end
 
 class State
   attr_accessor :facts, :heuristic, :previous, :action, :problem
 
   def initialize(problem, value, predicates)
+    @problem = problem
     @facts = {}
     value.each do |f|
       tokens = f.split
       predicate = predicates[tokens.shift]
-      fact = Fact.find(predicate, tokens)
+      fact = @problem.get_fact(predicate, tokens)
       @facts[fact.key] = fact
     end
     @heuristic = -1
     @previous = nil
     @action = nil
-    @problem = problem
   end
 
   def clone
@@ -160,7 +157,7 @@ class State
     predicate.parameters.each do |p|
       values << action.substitutions[tokens.shift]
     end
-    f = Fact.find(predicate, values)
+    f = @problem.get_fact(predicate, values)
   end
 
   def expand
