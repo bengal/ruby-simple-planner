@@ -16,11 +16,6 @@ class Problem
     @operators = values[:operators]
     @initial_state = values[:initial_state]
     @goal = values[:goal]
-    @@instance = self
-  end
-
-  def Problem.instance
-    @@instance
   end
 end
 
@@ -68,9 +63,9 @@ class Fact
 end
 
 class State
-  attr_accessor :facts, :heuristic, :previous, :action
+  attr_accessor :facts, :heuristic, :previous, :action, :problem
 
-  def initialize(value, predicates)
+  def initialize(problem, value, predicates)
     @facts = {}
     value.each do |f|
       tokens = f.split
@@ -81,10 +76,11 @@ class State
     @heuristic = -1
     @previous = nil
     @action = nil
+    @problem = problem
   end
   
   def clone
-    s = State.new([], nil)
+    s = State.new(@problem, [], nil)
     s.facts = @facts.dup
     s
   end
@@ -96,6 +92,7 @@ class State
   def delete_fact(fact)
     @facts.delete(fact.key)
   end
+
 
   def each_fact(&block)
     @facts.values.each{|v| yield v }
@@ -125,8 +122,8 @@ class State
 
   def find_applicable_actions
     res = []
-    Problem.instance.operators.each do |operator|
-      Planner.comb(Problem.instance.objects, operator.parameters.size).each do |objs|
+    @problem.operators.each do |operator|
+      Planner.comb(@problem.objects, operator.parameters.size).each do |objs|
         subst = {}
         param = Array.new(operator.parameters)
         objs.each{|o| subst[param.shift] = o}
@@ -157,7 +154,7 @@ class State
     if tokens[0].casecmp('not') == 0
       tokens.shift
     end
-    predicate = Problem.instance.predicates[tokens[0]]
+    predicate = @problem.predicates[tokens[0]]
     tokens = tokens[1..-1]
     values = []
     predicate.parameters.each do |p| 
@@ -247,15 +244,17 @@ class Planner
 
     problem = YAML.load(File.new(problem_file, 'r').read)
     objects = problem['objects']
-    initial_state = State.new(problem['init'], predicates)
-    goal = State.new(problem['goal'], predicates)
 
-    @current_state = initial_state
     @problem = Problem.new(:predicates => predicates,
                 :objects => objects,
-                :initial_state => initial_state,
-                :goal => goal,
                 :operators => operators)
+
+    initial_state = State.new(@problem, problem['init'], predicates)
+    goal = State.new(@problem, problem['goal'], predicates)
+
+    @problem.initial_state = initial_state
+    @problem.goal = goal
+    @current_state = initial_state
 
     @heuristic = Heuristic.new(@problem)
   end
